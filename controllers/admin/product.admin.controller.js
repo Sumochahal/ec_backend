@@ -114,6 +114,29 @@ exports.getallProduct = async (req, res) => {
     });
   }
 };
+// start****get all products by categoryid with name and same as well for subcategory id with name
+exports.getProductwithname = async (req, res) => {
+  try {
+    const products = await Product.find()
+      .populate("category_id", "name")       // 🔥 add this
+      .populate("subcategory_id", "name")   // 🔥 add this
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      total: products.length,
+      data: products,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// end *** get all products by categoryid with name and same as well for subcategory id with
+
 // delete products by id 
 exports.deleteProduct = async (req, res) => {
   try {
