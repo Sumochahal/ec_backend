@@ -25,6 +25,9 @@ app.use("/api/user",require("./routes/user/user.routes"));
 app.use("/api/home", require("./routes/user/home.routes"));// for home api fetch from category and banner data
 app.use("/api/admin/products",require("./routes/admin/product.admin.routes"));  
 app.use("/api/user",require("./routes/user/category.user.routes"));
+// Import user product routes
+app.use("/api/user/products",require("./routes/user/product.user.routes"));
+// Use route
 
 app.use(errorHandler);
 app.listen(process.env.PORT || 5000, () => console.log("Server running"));
