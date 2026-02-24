@@ -48,14 +48,14 @@ exports.createProduct = async (req, res) => {
 
     // 6️⃣ 🔥 Populate Category & SubCategory Name
     const populatedProduct = await Product.findById(product._id)
-      .populate({
-        path: "category_id",
-        select: "_id name",
-      })
-      .populate({
-        path: "subcategory_id",
-        select: "_id name",
-      });
+  .populate({
+    path: "category_id",
+    select: "_id cat_name",
+  })
+  .populate({
+    path: "subcategory_id",
+    select: "_id subcat_name",
+  });
 
     // 7️⃣ Final Response
     res.status(201).json({
