@@ -7,7 +7,6 @@ exports.createProduct = async (req, res) => {
     const { category_id } = req.params;
     const { subcategory_id, name, price, description } = req.body;
 
-    //Validate Category
     const category = await Category.findById(category_id);
     if (!category) {
       return res.status(404).json({
@@ -16,7 +15,6 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    // 2Validate SubCategory
     const subCategory = await SubCategory.findById(subcategory_id);
     if (!subCategory) {
       return res.status(404).json({
@@ -25,7 +23,6 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    // 3Ensure subcategory belongs to category
     if (subCategory.category_id.toString() !== category_id) {
       return res.status(400).json({
         success: false,
@@ -33,11 +30,8 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    // 4️Collect images
     const images = req.files ? req.files.map(file => file.path) : [];
-    // console.log("FILES:", req.files);
 
-    // 5️Create Product
     const product = await Product.create({
       category_id,
       subcategory_id,
@@ -47,10 +41,15 @@ exports.createProduct = async (req, res) => {
       images,
     });
 
+    // 🔥 Important Part
+    const populatedProduct = await Product.findById(product._id)
+      .populate("category_id", "_id name")
+      .populate("subcategory_id", "_id name");
+
     res.status(201).json({
       success: true,
       message: "Product created successfully",
-      data: product,
+      data: populatedProduct,
     });
 
   } catch (error) {
@@ -60,6 +59,65 @@ exports.createProduct = async (req, res) => {
     });
   }
 };
+
+// exports.createProduct = async (req, res) => {
+//   try {
+//     const { category_id } = req.params;
+//     const { subcategory_id, name, price, description } = req.body;
+
+//     //1Validate Category
+//     const category = await Category.findById(category_id);
+//     if (!category) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Category not found",
+//       });
+//     }
+
+//     // 2Validate SubCategory
+//     const subCategory = await SubCategory.findById(subcategory_id);
+//     if (!subCategory) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "SubCategory not found",
+//       });
+//     }
+
+//     // 3Ensure subcategory belongs to category
+//     if (subCategory.category_id.toString() !== category_id) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "SubCategory does not belong to this Category",
+//       });
+//     }
+
+//     // 4️Collect images
+//     const images = req.files ? req.files.map(file => file.path) : [];
+//     // console.log("FILES:", req.files);
+
+//     // 5️Create Product
+//     const product = await Product.create({
+//       category_id,
+//       subcategory_id,
+//       name,
+//       price,
+//       description,
+//       images,
+//     });
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Product created successfully",
+//       data: product,
+//     });
+
+//   } catch (error) {
+//     res.status(400).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 // get single product by id 
 exports.getSingleProduct = async (req, res) => {
   try {
