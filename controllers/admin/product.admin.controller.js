@@ -7,6 +7,7 @@ exports.createProduct = async (req, res) => {
     const { category_id } = req.params;
     const { subcategory_id, name, price, description } = req.body;
 
+    // 1️⃣ Validate Category
     const category = await Category.findById(category_id);
     if (!category) {
       return res.status(404).json({
@@ -15,6 +16,7 @@ exports.createProduct = async (req, res) => {
       });
     }
 
+    // 2️⃣ Validate SubCategory
     const subCategory = await SubCategory.findById(subcategory_id);
     if (!subCategory) {
       return res.status(404).json({
@@ -23,6 +25,7 @@ exports.createProduct = async (req, res) => {
       });
     }
 
+    // 3️⃣ Ensure subcategory belongs to category
     if (subCategory.category_id.toString() !== category_id) {
       return res.status(400).json({
         success: false,
@@ -30,8 +33,10 @@ exports.createProduct = async (req, res) => {
       });
     }
 
+    // 4️⃣ Collect images
     const images = req.files ? req.files.map(file => file.path) : [];
 
+    // 5️⃣ Create Product
     const product = await Product.create({
       category_id,
       subcategory_id,
@@ -41,11 +46,18 @@ exports.createProduct = async (req, res) => {
       images,
     });
 
-    // 🔥 Important Part
+    // 6️⃣ 🔥 Populate Category & SubCategory Name
     const populatedProduct = await Product.findById(product._id)
-      .populate("category_id", "_id name")
-      .populate("subcategory_id", "_id name");
+      .populate({
+        path: "category_id",
+        select: "_id name",
+      })
+      .populate({
+        path: "subcategory_id",
+        select: "_id name",
+      });
 
+    // 7️⃣ Final Response
     res.status(201).json({
       success: true,
       message: "Product created successfully",
